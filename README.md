@@ -5,6 +5,7 @@ DB: SQL Server
 
 /Server/appsettings.json example
 
+```
 {
   "ConnectionStrings": {
     "ConnectionDefault": "Server=localhost\\sqlexpress;Database=BeastBattle;TrustServerCertificate=true;Trusted_Connection=true"
@@ -20,3 +21,4 @@ DB: SQL Server
   },
   "AllowedHosts": "*"
 }
+```
