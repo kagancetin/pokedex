@@ -1,0 +1,204 @@
+﻿@page "/beast/{id:int}"
+@inject HttpClient http
+@inject IJSRuntime JSRunTime
+@attribute [Authorize]
+
+
+
+@if (beast == null)
+{
+    <PageTitle>Beast</PageTitle>
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <PageTitle>@beast.name</PageTitle>
+
+    <div class="card mb-5">
+        <img src="@beast.imageThumbnail" class="card-img-top m-auto" alt="..." style="width:10rem">
+        <div class="card-body">
+            <h3 class="card-title">@beast.name</h3>
+            <p class="card-text">@beast.description</p>
+            <p class="card-text">@beast.species</p>
+            <div class="row">
+                <div class="col-sm-6 col-md-4 col-lg-3 mb-1"><b>HP:</b> @beast.hP</div>
+                <div class="col-sm-6 col-md-4 col-lg-3 mb-1"><b>Attack:</b> @beast.attack</div>
+                <div class="col-sm-6 col-md-4 col-lg-3 mb-1"><b>Defense:</b> @beast.defense</div>
+                <div class="col-sm-6 col-md-4 col-lg-3 mb-1"><b>SpAttack:</b> @beast.spAttack</div>
+                <div class="col-sm-6 col-md-4 col-lg-3 mb-1"><b>SpDefense:</b> @beast.spDefense</div>
+                <div class="col-sm-6 col-md-4 col-lg-3 mb-1"><b>Speed:</b> @beast.speed</div>
+                <div class="col-sm-6 col-md-4 col-lg-3 mb-1"><b>Height:</b> @beast.height</div>
+                <div class="col-sm-6 col-md-4 col-lg-3 mb-1"><b>Gender:</b> @beast.gender</div>
+                <div class="col-sm-6 col-md-4 col-lg-3 mb-1"><b>Weight:</b> @beast.weight</div>
+            </div>
+        </div>
+        <div class="card-body">
+            <h4 class="card-title">Types: </h4>
+                @{
+                    string color;
+                }
+                @foreach (var typ in beast.types)
+                {
+
+                    if (typ.bgColor == "Light")
+                    {
+                        color = "#FFFFFF";
+                    }
+                    else
+                    {
+                        color = "#000000";
+                    }
+                    <p class="card-text mb-2 mt-3 h5"><a href="/type/@typ.name" style='background-color: @typ.color; color:@color' class="p-1 type-link"
+                    onmouseenter="onHoverTypeItem(this)">@typ.name</a>&nbsp&nbsp</p>
+                    <div class="ps-3">
+                    @if (typ.effectives.Count > 0)
+                    {
+                        <p class="card-text"><b>Effective:</b> @foreach (var lst in typ.effectives)
+                            {
+                                var eff = lst.typeDetail;
+                                if (eff.bgColor == "Light")
+                                {
+                                    color = "#FFFFFF";
+                                }
+                                else
+                                {
+                                    color = "#000000";
+                                }
+                                <span><a href="/type/@eff.name" style='background-color: @eff.color; color:@color' class="p-1 type-link"
+                        onmouseenter="onHoverTypeItem(this)">@eff.name</a>&nbsp&nbsp</span>
+                            }</p>
+                    }
+                    
+                    @if (typ.inEffectives.Count > 0)
+                    {
+                        <p class="card-text"><b>Ineffective:</b> @foreach (var lst in typ.inEffectives)
+                            {
+                                var eff = lst.typeDetail;
+                                if (eff.bgColor == "Light")
+                                {
+                                    color = "#FFFFFF";
+                                }
+                                else
+                                {
+                                    color = "#000000";
+                                }
+                                <span><a href="/type/@eff.name" style='background-color: @eff.color; color:@color' class="p-1 type-link"
+                        onmouseenter="onHoverTypeItem(this)">@eff.name</a>&nbsp&nbsp</span>
+                            }</p>
+                    }
+                    
+                    @if (typ.noEffects.Count > 0)
+                    {
+                        <p class="card-text"><b>Noeffect:</b> @foreach (var lst in typ.noEffects)
+                            {
+                                var eff = lst.typeDetail;
+                                if (eff.bgColor == "Light")
+                                {
+                                    color = "#FFFFFF";
+                                }
+                                else
+                                {
+                                    color = "#000000";
+                                }
+                                <span><a href="/type/@eff.name" style='background-color: @eff.color; color:@color' class="p-1 type-link"
+                        onmouseenter="onHoverTypeItem(this)">@eff.name</a>&nbsp&nbsp</span>
+                            }</p>
+                    }
+                    </div>
+                }
+        </div>
+        <hr>
+        <div class="card-body">
+            <h4 class="card-title">Abilities can be acquired: </h4>
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Accuracy</th>
+                        <th>Power</th>
+                        <th>PP</th>
+                        <th>Type</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var ability in beast.abilities)
+                    {
+                        <tr>
+                            <td><a href="/ability/@ability.id">@ability.name</a></td>
+                            <td>@ability.accuracy</td>
+                            <td>@ability.power</td>
+                            <td>@ability.pP</td>
+                            <td>
+                                @if (ability.type.bgColor == "Light")
+                                {
+                                    color = "#FFFFFF";
+                                }
+                                else
+                                {
+                                    color = "#000000";
+                                }
+                                <span><a href="/type/@ability.type.name"
+                                    style='background-color: @ability.type.color; color:@color' class="p-1 type-link"
+                                    onmouseenter="onHoverTypeItem(this)">@ability.type.name</a>&nbsp&nbsp</span>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+        @if(beast.nextEvolution != null){
+            <hr>
+            <div class="card-body">
+                 <h4 class="card-title">Next Evolation: </h4>
+                <a href="/beast/@beast.nextEvolution.id">
+                    <img src="@beast.nextEvolution.imageThumbnail" class="card-img-top m-auto" alt="..." style="width:5rem">
+                    <span>@beast.nextEvolution.name</span>
+                </a>
+                <br>
+                @if(beast.nextEvolution.nextEvolution != null){
+                <a href="/beast/@beast.nextEvolution.nextEvolution.id">
+                    <img src="@beast.nextEvolution.nextEvolution.imageThumbnail" class="card-img-top m-auto" alt="..." style="width:5rem">
+                    <span>@beast.nextEvolution.nextEvolution.name</span>
+                </a>
+            }
+            </div>
+        }
+        
+    </div>
+}
+
+
+@code {
+
+    [Parameter]
+    public int id { get; set; }
+    private BeastDataDto beast;
+
+
+    protected override async Task OnInitializedAsync()
+    {
+        
+
+        await JSRunTime.InvokeVoidAsync("jsFileSrc", "/js/typePages/hoverType.js");
+    }
+
+    protected override async Task OnParametersSetAsync()
+    {
+       var result = await this.http.GetFromJsonAsync<PageDto<BeastPageDto>>("api/beast/" + id);
+
+
+        if (result.errors is null)
+        {
+            beast = result.data.beast;
+        }
+        else
+        {
+            foreach (var error in result.errors)
+            {
+                Console.WriteLine(error.message);
+            }
+
+        }
+
+    }
+}

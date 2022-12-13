@@ -1,0 +1,151 @@
+@page "/type/{name}"
+@inject ITypeService TypeService
+@attribute [Authorize]
+
+@if (type == null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <div class="card my-3">
+        <h5 class="card-header">@type.name</h5>
+        <div class="card-body">
+                    @{
+                        string color;
+                    }
+                    <div class="ps-3">
+                    @if (type.effectives.Count > 0)
+                    {
+                        <p class="card-text"><b>Effective:</b> @foreach (var lst in type.effectives)
+                            {
+                                var eff = lst.typeDetail;
+                                if (eff.bgColor == "Light")
+                                {
+                                    color = "#FFFFFF";
+                                }
+                                else
+                                {
+                                    color = "#000000";
+                                }
+                                <span><a href="/type/@eff.name" style='background-color: @eff.color; color:@color' class="p-1 type-link"
+                        onmouseenter="onHoverTypeItem(this)">@eff.name</a>&nbsp&nbsp</span>
+                            }</p>
+                    }
+                    
+                    @if (type.inEffectives.Count > 0)
+                    {
+                        <p class="card-text"><b>Ineffective:</b> @foreach (var lst in type.inEffectives)
+                            {
+                                var eff = lst.typeDetail;
+                                if (eff.bgColor == "Light")
+                                {
+                                    color = "#FFFFFF";
+                                }
+                                else
+                                {
+                                    color = "#000000";
+                                }
+                                <span><a href="/type/@eff.name" style='background-color: @eff.color; color:@color' class="p-1 type-link"
+                        onmouseenter="onHoverTypeItem(this)">@eff.name</a>&nbsp&nbsp</span>
+                            }</p>
+                    }
+                    
+                    @if (type.noEffects.Count > 0)
+                    {
+                        <p class="card-text"><b>Noeffect:</b> @foreach (var lst in type.noEffects)
+                            {
+                                var eff = lst.typeDetail;
+                                if (eff.bgColor == "Light")
+                                {
+                                    color = "#FFFFFF";
+                                }
+                                else
+                                {
+                                    color = "#000000";
+                                }
+                                <span><a href="/type/@eff.name" style='background-color: @eff.color; color:@color' class="p-1 type-link"
+                        onmouseenter="onHoverTypeItem(this)">@eff.name</a>&nbsp&nbsp</span>
+                            }</p>
+                    }
+            </div>
+        </div>
+    </div>
+
+    <div class="card my-3">
+        <div class="card-header">
+            Beasts
+        </div>
+        <div class="card-body">
+            <div class="row">
+                @foreach (var beast in type.beasts)
+                {
+                    <div class="col-sm-6 col-md-4 col-lg-3 my-2">
+                        <a href="/beast/@beast.id">
+                            <img src="@beast.imageThumbnail" class="card-img-top m-auto" alt="..." style="width:5rem">
+                            <br>
+                            <span>@beast.name</span>
+                        </a>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+
+    <div class="card my-3">
+        <div class="card-header">
+            Abilities
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Accuracy</th>
+                            <th>Power</th>
+                            <th>PP</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var ability in type.abilities)
+                        {
+                            <tr>
+                                <td><a href="/ability/@ability.id">@ability.name</a></td>
+                                <td>@ability.accuracy</td>
+                                <td>@ability.power</td>
+                                <td>@ability.pP</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+}
+@code {
+    [Parameter]
+    public string name { get; set; }
+    private TypeDataDto type;
+
+
+    protected override async Task OnParametersSetAsync()
+    {
+        Console.WriteLine(name);
+        var result = await TypeService.GetType(name);
+        if (result.errors is null)
+        {
+            type = result.data.type;
+        }
+        else
+        {
+            foreach (var error in result.errors)
+            {
+                Console.WriteLine(error.message);
+            }
+        }
+    }
+
+
+
+}

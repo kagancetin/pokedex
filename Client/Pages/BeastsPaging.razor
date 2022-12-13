@@ -1,0 +1,175 @@
+﻿@page "/beastsPaging"
+@page "/beastsPaging/{page:int}"
+@inject NavigationManager NavigationManager
+@inject HttpClient http
+@attribute [Authorize]
+@inject IJSRuntime JSRunTime
+
+<PageTitle>Beasts</PageTitle>
+
+@if (beasts == null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <div class="mb-3">
+        <label for="nameFilter" class="form-label">Filter By name</label>
+        <input type="text" @bind="@filterNameValue" class="form-control" id="nameFilter" placeholder="Enter contains chars">
+    </div>
+    <button type="button" onclick="@filterBeast" class="btn btn-primary">Filter</button>
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Pokemon Adı</th>
+                <th>Pokemon Görseli</th>
+                <th>Pokemon Evrimi</th>
+                <th>Pokemon Evrim Görseli</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var beast in beasts.nodes)
+            {
+                <tr>
+                    <td><a href="/beast/@beast.id">@beast.name</a></td>
+                    <td>
+                        <a href="/beast/@beast.id">
+                            <img src="@beast.imageThumbnail" class="img-thumbnail" style="width: 100px;">
+                        </a>
+                    </td>
+                    <td>
+                        @if (@beast.nextEvolution != null)
+                        {
+                            <a href="/beast/@beast.nextEvolution.id">@beast.nextEvolution.name</a>
+                        }
+                        else
+                        {
+                            <span>Yok</span>
+                        }
+                    </td>
+                    <td>
+                        @if (@beast.nextEvolution != null)
+                        {
+                            <a href="/beast/@beast.nextEvolution.id">
+                                <img src="@beast.nextEvolution.imageThumbnail" class="img-thumbnail" style="width: 100px;">
+                            </a>
+                        }
+                        else
+                        {
+                            <span>Yok</span>
+                        }
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+
+
+    <div class="mt-3 mb-4 d-flex justify-content-center">
+        <nav class="myPagination" aria-label="Page navigation">
+            @{
+                int? pageCount = beasts.totalCount / 30 + 1;
+            }
+            @if (pageCount > 1)
+            {
+
+
+                <ul class="pagination pagination-sm ">
+                    @{
+                        string urlCont = (page - 1).ToString() + query;
+                    }
+                    @if (beasts.pageInfo.hasPreviousPage)
+                    {
+                        <li class="page-item"><a class="page-link" href="/beastsPaging/@urlCont">Previous</a></li>
+                    }
+                    @for (int i = 0; i < pageCount; i++)
+                    {
+
+                        urlCont = (i + 1).ToString() + query;
+                        string isActive = "";
+                        if (i == (page - 1)) isActive = "active";
+                        <li class="page-item page-item-pages @isActive"><a class="page-link d-block"
+                    href="/beastsPaging/@urlCont">@(i+1)</a></li>
+                    }
+                    @{
+                        urlCont = (page + 1).ToString() + query;
+                    }
+                    @if (beasts.pageInfo.hasNextPage)
+                    {
+                        <li class="page-item"><a class="page-link" href="/beastsPaging/@urlCont">Next</a></li>
+                    }
+                </ul>
+            }
+        </nav>
+    </div>
+
+}
+
+
+@code {
+    private PagingDto<BeastDataDto>? beasts;
+    private int beastCount;
+    IJSObjectReference? module;
+    private string? query;
+    private bool runPaginateJS = false;
+
+    private string filterNameValue { get; set; } = "";
+    [Parameter]
+    public int? page { get; set; }
+    [Parameter]
+    [SupplyParameterFromQuery(Name = "filterName")]
+    public string? FilterName { get; set; }
+
+
+
+    protected override async Task OnParametersSetAsync()
+    {
+        page = page ?? 1;
+        query = new Uri(NavigationManager.Uri).Query;
+        Console.WriteLine(query);
+        var result = await this.http.GetFromJsonAsync<PageDto<BeastPageDto>>("api/beast/paging/" + page + query);
+
+        if (result.errors is null)
+        {
+            runPaginateJS = true;
+            beasts = result.data.beastsPaging;
+        }
+        else
+        {
+            foreach (var error in result.errors)
+            {
+                Console.WriteLine(error.message);
+            }
+        }
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+
+        module = await JSRunTime.InvokeAsync<IJSObjectReference>("import", "/js/beastPages/paging.js");
+
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!firstRender && runPaginateJS)
+        {
+            await module.InvokeVoidAsync("reducePaginationList", page);
+            runPaginateJS = false;
+        }
+
+    }
+
+    private async Task filterBeast()
+    {
+        if (filterNameValue != "")
+        {
+            NavigationManager.NavigateTo("beastsPaging?filterName=" + filterNameValue);
+        }
+        else
+        {
+            NavigationManager.NavigateTo("beastsPaging");
+        }
+
+    }
+}

@@ -1,0 +1,97 @@
+@page "/ability/{id:int}"
+@inject HttpClient http
+@inject IJSRuntime JSRunTime
+@attribute [Authorize]
+
+
+
+
+@if (ability == null)
+{
+    <PageTitle>Ability</PageTitle>
+    <p><em>Loading...</em></p>
+}
+else
+{
+
+    <PageTitle>@ability.name</PageTitle>
+
+    <div class="card">
+        <div class="card-header">
+            @ability.name
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-sm-6 col-md-4 col-lg-3 mb-1"><b>Accuracy:</b> @ability.accuracy</div>
+                <div class="col-sm-6 col-md-4 col-lg-3 mb-1"><b>Power:</b> @ability.power</div>
+                <div class="col-sm-6 col-md-4 col-lg-3 mb-1"><b>PP:</b> @ability.pP</div>
+                <div class="col-sm-6 col-md-4 col-lg-3 mb-1"><b>Type: </b>
+                    @{
+                        string color;
+
+                        if (ability.type.bgColor == "Light")
+
+                        {
+                            color = "#FFFFFF";
+                        }
+                        else
+                        {
+                            color = "#000000";
+                        }
+                    }
+                    <span><a href="/type/@ability.type.name" style='background-color: @ability.type.color; color:@color'
+                        class="p-1 type-link"
+                        onmouseenter="onHoverTypeItem(this)">@ability.type.name</a>&nbsp&nbsp</span>
+                </div>
+            </div>
+        </div>
+        <div class="card-body">
+            <h3 class="card-title">Beasts can use</h3>
+            <div class="row">
+                @foreach (var beast in ability.type.beasts)
+                {
+                    <div class="col-sm-6 col-md-4 col-lg-3 my-2">
+                        <a href="/beast/@beast.id">
+                            <img src="@beast.imageThumbnail" class="card-img-top m-auto" alt="..." style="width:5rem">
+                            <br>
+                            <span>@beast.name</span>
+                        </a>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+}
+
+
+@code {
+
+    [Parameter]
+    public int id { get; set; }
+    private AbilityDataDto ability;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await JSRunTime.InvokeVoidAsync("jsFileSrc", "/js/typePages/hoverType.js");
+    }
+
+    protected override async Task OnParametersSetAsync()
+    {
+        var result = await this.http.GetFromJsonAsync<PageDto<AbilityPageDto>>("api/ability/solo/" + id);
+        if (result.errors is null)
+        {
+            ability = result.data.ability;
+        }
+        else
+        {
+            Console.WriteLine("laaaaa");
+            foreach (var error in result.errors)
+            {
+                Console.WriteLine(error.message);
+            }
+
+        }
+
+    }
+
+}

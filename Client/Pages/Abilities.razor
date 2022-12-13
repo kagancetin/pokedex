@@ -1,0 +1,252 @@
+@page "/abilities"
+@inject HttpClient http
+@inject IJSRuntime JSRunTime
+@attribute [Authorize]
+
+
+<PageTitle>Abilities</PageTitle>
+
+
+@if (abilities == null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <div class="card my-3">
+        <div class="card-header">
+            Abilities
+        </div>
+        <div class="card-body">
+            <div class="table-responsive w-100" style="overflow-x:auto;">
+                <div class="w-100">
+                    <span class="float-start">
+                        <select class="form-select" @onchange="@SelectPageSize">
+                            <option value="10">10</option>
+                            <option value="20">20</option>
+                            <option selected value="30">30</option>
+                            <option value="50">50</option>
+                            <option value="100">100</option>
+                        </select>
+                    </span>
+                </div>
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>Name <i class="@nameClass float-end" @onclick='e=> SortTable("name")'></i></th>
+                            <th>Accuracy <i class="@accuracyClass float-end" @onclick='e=> SortTable("accuracy")'></i></th>
+                            <th>Power <i class="@powerClass float-end" @onclick='e=> SortTable("power")'></i></th>
+                            <th>PP</th>
+                            <th>Type <i class="@typeClass float-end" @onclick='e=> SortTable("typeName")'></i></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @{
+                            string color;
+                        }
+                        @foreach (var ability in abilities.nodes)
+                        {
+                            <tr>
+                                <td><a href="/ability/@ability.id">@ability.name</a></td>
+                                <td>@ability.accuracy</td>
+                                <td>@ability.power</td>
+                                <td>@ability.pP</td>
+                                <td>
+                                    @if (ability.type.bgColor == "Light")
+                                    {
+                                        color = "#FFFFFF";
+                                    }
+                                    else
+                                    {
+                                        color = "#000000";
+                                    }
+                                    <span><a href="/type/@ability.type.name"
+                                    style='background-color: @ability.type.color; color:@color' class="p-1 type-link"
+                                    onmouseenter="onHoverTypeItem(this)">@ability.type.name</a>&nbsp&nbsp</span>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="mt-3 mb-4 d-flex justify-content-center">
+                <nav class="myPagination" aria-label="Page navigation">
+                    @{
+                        int? pageCount = abilities.totalCount / pageSize + 1;
+                    }
+                    @if (pageCount > 1)
+                    {
+                        <ul class="pagination pagination-sm ">
+                            @{
+                                int urlPre = page - 1;
+                            }
+                            @if (abilities.pageInfo.hasPreviousPage)
+                            {
+                                <li class="page-item" @onclick="@(e=>SelectPage(urlPre))" style="cursor: pointer;"><a
+                            class="page-link">Previous</a></li>
+                            }
+                            @for (int i = 0; i < pageCount; i++)
+                            {
+                                var urlpage = i + 1;
+                                string isActive = "";
+                                if (i == (page - 1)) isActive = "active";
+                                <li class="page-item page-item-pages @isActive" @onclick="@(e=>SelectPage(urlpage))"
+                        style="cursor: pointer;"><a class="page-link d-block">@urlpage</a></li>
+                            }
+                            @{
+                                var urlNext = page + 1;
+                            }
+                            @if (abilities.pageInfo.hasNextPage)
+                            {
+                                <li class="page-item" @onclick="@(e=>SelectPage(urlNext))" style="cursor: pointer;"><a
+                            class="page-link">Next</a></li>
+                            }
+                        </ul>
+                    }
+                </nav>
+            </div>
+
+        </div>
+    </div>
+}
+
+
+@code {
+
+    private PagingDto<AbilityDataDto>? abilities;
+    private int page = 1;
+    private IJSObjectReference? module;
+    private bool runPaginateJS = false;
+
+    private string sort = "name";
+    private string sortType = "ASC";
+
+    private string nameClass = "fa-solid fa-arrow-up-a-z";
+    private string accuracyClass = "fa-solid fa-arrow-up-z-a";
+    private string powerClass = "fa-solid fa-arrow-up-z-a";
+    private string typeClass = "fa-solid fa-arrow-up-z-a";
+
+    ///TABLE ITEMS
+    private int pageSize = 30;
+    ///TABLE ITEMS
+
+    protected override async Task OnParametersSetAsync()
+    {
+
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        await JSRunTime.InvokeVoidAsync("jsFileSrc", "/js/typePages/hoverType.js");
+        await JSRunTime.InvokeVoidAsync("jsFileSrc", "/js/table/tablePaging.js");
+        RefreshTable();
+    }
+
+
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!firstRender && runPaginateJS)
+        {
+            runPaginateJS = false;
+            JSRunTime.InvokeVoidAsync("reducePaginationList", page);
+        }
+    }
+
+    private async Task RefreshTable()
+    {
+        string url = "api/ability?size=" + pageSize + "&&page=" + page + "&&sort=" + sort + "&&sortType=" + sortType;
+        var result = await this.http.GetFromJsonAsync<PageDto<AbilityPageDto>>(url);
+        if (result.errors is null)
+        {
+            runPaginateJS = true;
+            abilities = result.data.abilityPaging;
+            StateHasChanged();
+        }
+        else
+        {
+            foreach (var error in result.errors)
+            {
+                Console.WriteLine(error.message);
+            }
+        }
+
+    }
+
+    private async void SelectPageSize(ChangeEventArgs e)
+    {
+        var oldPageSize = pageSize;
+        pageSize = Int32.Parse(e.Value.ToString());
+        var firstItem = oldPageSize * (page - 1) + 1;
+        page = Int32.Parse((firstItem / pageSize + 1).ToString());
+        RefreshTable();
+    }
+
+    private async Task SelectPage(int newPage)
+    {
+        page = newPage;
+        RefreshTable();
+    }
+
+    private async Task SortTable(string column)
+    {
+        switch (column)
+        {
+            case "name":
+                if (nameClass == "fa-solid fa-arrow-up-a-z")
+                {
+                    nameClass = "fa-solid fa-arrow-up-z-a";
+                    sortType = "DESC";
+                }
+                else
+                {
+                    nameClass = "fa-solid fa-arrow-up-a-z";
+                    sortType = "ASC";
+                }
+                break;
+            case "power":
+                if (powerClass == "fa-solid fa-arrow-up-a-z")
+                {
+                    powerClass = "fa-solid fa-arrow-up-z-a";
+                    sortType = "DESC";
+                }
+                else
+                {
+                    powerClass = "fa-solid fa-arrow-up-a-z";
+                    sortType = "ASC";
+                }
+                break;
+            case "accuracy":
+                if (accuracyClass == "fa-solid fa-arrow-up-a-z")
+                {
+                    accuracyClass = "fa-solid fa-arrow-up-z-a";
+                    sortType = "DESC";
+                }
+                else
+                {
+                    accuracyClass = "fa-solid fa-arrow-up-a-z";
+                    sortType = "ASC";
+                }
+                break;
+            case "typeName":
+                if (typeClass == "fa-solid fa-arrow-up-a-z")
+                {
+                    typeClass = "fa-solid fa-arrow-up-z-a";
+                    sortType = "DESC";
+                }
+                else
+                {
+                    typeClass = "fa-solid fa-arrow-up-a-z";
+                    sortType = "ASC";
+                }
+                break;
+            default:
+                // code block
+                break;
+        }
+        sort = column;
+        RefreshTable();
+    }
+
+}

@@ -1,0 +1,16 @@
+﻿@page "/admin"
+
+<PageTitle>Index</PageTitle>
+
+<AuthorizeView>
+    <Authorized>
+        <h3>Hi! You're logged in with <i>@context.User.Identity.Name</i>.</h3>
+    </Authorized>
+    <NotAuthorized>
+        <h3>Hello, world!</h3>
+    </NotAuthorized>
+</AuthorizeView>
+
+Welcome to your new app.
+
+<SurveyPrompt Title="How is Blazor working for you?" />

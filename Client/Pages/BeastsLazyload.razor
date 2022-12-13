@@ -1,0 +1,98 @@
+@page "/beastsLazyLoad"
+@inject HttpClient http
+@inject IJSRuntime JSRunTime
+@attribute [Authorize]
+
+<PageTitle>Beasts</PageTitle>
+
+
+@if (beasts == null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Pokemon Adı</th>
+                <th>Pokemon Görseli</th>
+                <th>Pokemon Evrimi</th>
+                <th>Pokemon Evrim Görseli</th>
+            </tr>
+        </thead>
+        <tbody>
+            @{
+                int i = page;
+            }
+            @foreach (var beast in beasts)
+            {
+                <tr>
+                    <td><a href="/beast/@beast.id">@beast.name @i</a></td>
+                    <td>
+                        <a href="/beast/@beast.id">
+                            <img src="@beast.imageThumbnail" class="img-thumbnail" style="width: 100px;">
+                        </a>
+                    </td>
+                    <td>
+                        @if (@beast.nextEvolution != null)
+                        {
+                            <a href="/beast/@beast.nextEvolution.id">@beast.nextEvolution.name</a>
+                        }
+                        else
+                        {
+                            <span>Yok</span>
+                        }
+                    </td>
+                    <td>
+                        @if (@beast.nextEvolution != null)
+                        {
+                            <a href="/beast/@beast.nextEvolution.id">
+                                <img src="@beast.nextEvolution.imageThumbnail" class="img-thumbnail" style="width: 100px;">
+                            </a>
+                        }
+                        else
+                        {
+                            <span>Yok</span>
+                        }
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+
+@code {
+    private List<BeastDataDto> beasts = new List<BeastDataDto>();
+    public int page = 1;
+    private bool isEnd = false;
+
+
+    protected override async Task OnInitializedAsync()
+    {
+        await JSRunTime.InvokeVoidAsync("jsFileSrc", "/js/lazyLoadScroll.js");
+        GetData();
+    }
+
+    [JSInvokable]
+    public async Task GetData()
+    {
+        var result = await this.http.GetFromJsonAsync<PageDto<BeastPageDto>>("api/beast/paging/" + page);
+        if (result.errors is null)
+        {
+            if (result.data.beastsPaging.pageInfo.hasNextPage == false) isEnd = true;
+            beasts.AddRange(result.data.beastsPaging.nodes);
+            StateHasChanged();
+            page++;
+            await JSRunTime.InvokeVoidAsync("lazyLoad", isEnd, "GetData", "/beastsLazyLoad", DotNetObjectReference.Create(this));
+        }
+        else
+        {
+            foreach (var error in result.errors)
+            {
+                Console.WriteLine(error.message);
+            }
+        }
+    }
+}

@@ -1,0 +1,123 @@
+@page "/types"
+@inject ITypeService TypeService
+@inject IJSRuntime JSRunTime
+@attribute [Authorize]
+
+<PageTitle>Types</PageTitle>
+
+@if (types == null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <div class="table-responsive-xxl">
+        <table class="table table-bordered border-dark">
+            <thead class="table-dark">
+                <tr>
+                    <th>Type Name</th>
+                    <th>Effective Types</th>
+                    <th>Ineffective Types</th>
+                    <th>Noeffect Types</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var type in types.data.types)
+                {
+                    <tr>
+                        @{
+                            string color;
+                            if (type.bgColor == "Light")
+                            {
+                                color = "#FFFFFF";
+                            }
+                            else
+                            {
+                                color = "#000000";
+                            }
+                        }
+                        <td style='background-color: @type.color' onclick="deneme()">
+                            <a href="/type/@type.name" style="color:@color">@type.name</a>
+                        </td>
+                        <td>
+                            @foreach (var lst in type.effectives)
+                            {
+                                var eff = lst.typeDetail;
+                                if (eff.bgColor == "Light")
+                                {
+                                    color = "#FFFFFF";
+                                }
+                                else
+                                {
+                                    color = "#000000";
+                                }
+                                <span><a href="/type/@eff.name" style='background-color: @eff.color; color:@color'
+                            class="p-1 type-link" onmouseenter="onHoverTypeItem(this)">@eff.name</a>&nbsp&nbsp</span>
+                            }
+                        </td>
+                        <td>
+                            @foreach (var lst in type.inEffectives)
+                            {
+                                var eff = lst.typeDetail;
+                                if (eff.bgColor == "Light")
+                                {
+                                    color = "#FFFFFF";
+                                }
+                                else
+                                {
+                                    color = "#000000";
+                                }
+                                <span><a href="/type/@eff.name" style='background-color: @eff.color; color:@color'
+                            class="p-1 type-link" onmouseenter="onHoverTypeItem(this)">@eff.name</a>&nbsp&nbsp</span>
+                            }
+                        </td>
+                        <td>
+                            @foreach (var lst in type.noEffects)
+                            {
+                                var eff = lst.typeDetail;
+                                if (eff.bgColor == "Light")
+                                {
+                                    color = "#FFFFFF";
+                                }
+                                else
+                                {
+                                    color = "#000000";
+                                }
+                                <span><a href="/type/@eff.name" style='background-color: @eff.color; color:@color'
+                            class="p-1 type-link" onmouseenter="onHoverTypeItem(this)">@eff.name</a>&nbsp&nbsp</span>
+                            }
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+}
+
+@code {
+    private PageDto<TypePageDto> types;
+    protected override async Task OnInitializedAsync()
+    {
+        var result = await TypeService.GetTypes();
+        if (result.errors is null)
+        {
+            types = result;
+        }
+        else
+        {
+            foreach (var error in types.errors)
+            {
+                Console.WriteLine(error.message);
+            }
+        }
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            await JSRunTime.InvokeVoidAsync("jsFileSrc", "/js/typePages/hoverType.js");
+        }
+
+    }
+}

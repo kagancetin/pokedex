@@ -1,0 +1,23 @@
+﻿@inherits LayoutComponentBase
+@inject IAuthService AuthService
+@inject NavigationManager NavigationManager
+
+<div class="page">
+    <main class="d-flex justify-content-center align-items-center">
+        <article>
+            @Body
+        </article>
+    </main>
+</div>
+
+@code {
+    protected override async Task OnInitializedAsync()
+    {
+        bool authorized = await AuthService.IsUserAuthenticated();
+        if (authorized)
+        {
+            NavigationManager.NavigateTo("");
+        }
+
+    }
+}
