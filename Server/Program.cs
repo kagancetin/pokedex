@@ -105,6 +105,18 @@ app.UseHttpsRedirection();
 app.UseBlazorFrameworkFiles();
 app.UseStaticFiles();
 
+app.MapWhen(ctx => ctx.Request.Path.StartsWithSegments("/admin"), appAdmin =>
+{
+    appAdmin.UseBlazorFrameworkFiles("/admin");
+    appAdmin.UseRouting();
+    appAdmin.UseStaticFiles();
+    appAdmin.UseStaticFiles("/admin");
+    appAdmin.UseEndpoints(endpoints =>
+    {
+        endpoints.MapFallbackToFile("/admin/{*path:nonfile}", "/admin/index.html");
+    });
+});
+
 app.UseRouting();
 
 app.UseAuthentication();

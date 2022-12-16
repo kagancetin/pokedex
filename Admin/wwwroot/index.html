@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title>Admin</title>
+    <base href="/admin/" />
+    <link rel="icon" type="image/png" href="favicon.png" />
+    <link rel="stylesheet"
+        href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700&display=fallback">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="plugins/fontawesome-free/css/all.min.css">
+    <!-- Theme style -->
+    <link rel="stylesheet" href="dist/css/adminlte.min.css">
+
+    <style>
+        #blazor-error-ui {
+            display: none;
+        }
+    </style>
+
+</head>
+
+<body class="sidebar-mini layout-fixed">
+    <div id="app">
+
+    </div>
+
+    <div id="blazor-error-ui">
+        An unhandled error has occurred.
+        <a href="" class="reload">Reload</a>
+        <a class="dismiss">🗙</a>
+    </div>
+
+
+    <script src="_framework/blazor.webassembly.js"></script>
+    <!-- jQuery -->
+    <script src="plugins/jquery/jquery.min.js"></script>
+    <!-- Bootstrap 4 -->
+    <script src="plugins/bootstrap/js/bootstrap.bundle.min.js"></script>
+    <!-- AdminLTE App -->
+    <script src="dist/js/adminlte.min.js"></script>
+    <script>
+        function jsFileSrc(srcUrl) {
+            if (srcUrl) {
+                var customScript = document.createElement('script');
+                customScript.setAttribute('src', srcUrl);
+                document.body.appendChild(customScript);
+            }
+        };
+    </script>
+
+
+</body>
+
+</html>
