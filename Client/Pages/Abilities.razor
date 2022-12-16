@@ -140,7 +140,7 @@ else
     {
         await JSRunTime.InvokeVoidAsync("jsFileSrc", "/js/typePages/hoverType.js");
         await JSRunTime.InvokeVoidAsync("jsFileSrc", "/js/table/tablePaging.js");
-        RefreshTable();
+        await RefreshTable();
     }
 
 
@@ -150,7 +150,7 @@ else
         if (!firstRender && runPaginateJS)
         {
             runPaginateJS = false;
-            JSRunTime.InvokeVoidAsync("reducePaginationList", page);
+            await JSRunTime.InvokeVoidAsync("reducePaginationList", page);
         }
     }
 

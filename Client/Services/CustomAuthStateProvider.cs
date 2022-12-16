@@ -2,7 +2,6 @@ using System.Net.Http.Headers;
 using System.Security.Claims;
 using System.Text.Json;
 using Blazored.LocalStorage;
-using BeastBattle.Client.Services.Contracts;
 using Microsoft.AspNetCore.Components.Authorization;
 
 namespace BeastBattle.Client.Services
