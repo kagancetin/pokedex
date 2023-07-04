@@ -16,7 +16,6 @@ namespace Namespace
         {
             this.executor = executor;
         }
-
         [HttpGet]
         public async Task<ActionResult<PageDto<TypePageDto>>> GetTypes()
         {
@@ -54,7 +53,6 @@ query {
             IExecutionResult result = await executor.Execute(myquery);
             return Ok(result.ToJson());
         }
-
         [HttpGet("{name}")]
         public async Task<ActionResult<PageDto<TypePageDto>>> GetType(string name)
         {

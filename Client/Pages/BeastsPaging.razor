@@ -126,7 +126,6 @@ else
     {
         page = page ?? 1;
         query = new Uri(NavigationManager.Uri).Query;
-        Console.WriteLine(query);
         var result = await this.http.GetFromJsonAsync<PageDto<BeastPageDto>>("api/beast/paging/" + page + query);
 
         if (result.errors is null)

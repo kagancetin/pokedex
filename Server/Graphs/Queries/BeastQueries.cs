@@ -8,7 +8,7 @@ namespace BeastBattle.Server.Graphs
 
         public async Task<List<BeastGType>?> Beasts(BeastBattleDbContext beastBattleDbContext)
         {
-            var beasts = await this.beastService.Beasts();
+            var beasts = await this.beastService.Beasts(beastBattleDbContext);
 
             return beasts;
         }
@@ -17,14 +17,14 @@ namespace BeastBattle.Server.Graphs
         [UseFiltering]
         public async Task<IEnumerable<BeastGType>?> BeastsPaging(BeastBattleDbContext beastBattleDbContext)
         {
-            var beasts = await this.beastService.Beasts();
+            var beasts = await this.beastService.Beasts(beastBattleDbContext);
 
             return beasts;
         }
         [UseFiltering]
         public async Task<List<BeastGType>?> BeastsFilter(BeastBattleDbContext beastBattleDbContext)
         {
-            var beasts = await this.beastService.Beasts();
+            var beasts = await this.beastService.Beasts(beastBattleDbContext);
 
             return beasts;
         }

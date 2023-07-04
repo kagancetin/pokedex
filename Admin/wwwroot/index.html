@@ -44,9 +44,16 @@
     <script>
         function jsFileSrc(srcUrl) {
             if (srcUrl) {
-                var customScript = document.createElement('script');
-                customScript.setAttribute('src', srcUrl);
-                document.body.appendChild(customScript);
+                var isExist = false
+                Array.from(document.scripts).forEach(element => {
+                    var nodeValue = element.attributes.src ? element.attributes.src.nodeValue : ""
+                    if (nodeValue == srcUrl) isExist = true
+                });
+                if (!isExist) {
+                    var customScript = document.createElement('script');
+                    customScript.setAttribute('src', srcUrl);
+                    document.body.appendChild(customScript);
+                }
             }
         };
     </script>

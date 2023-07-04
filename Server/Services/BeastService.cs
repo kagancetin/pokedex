@@ -17,9 +17,9 @@ namespace BeastBattle.Server.Services
         {
             this.BeastBattleDbContext = BeastBattleDbContext;
         }
-        public async Task<List<BeastGType>?> Beasts()
+        public async Task<List<BeastGType>?> Beasts(BeastBattleDbContext beastBattleDbContext)
         {
-            var _beasts = await this.BeastBattleDbContext.Beasts.ToListAsync();
+            var _beasts = await beastBattleDbContext.Beasts.ToListAsync();
             List<BeastGType> beasts = new List<BeastGType>();
             foreach (Beast beast in _beasts)
             {

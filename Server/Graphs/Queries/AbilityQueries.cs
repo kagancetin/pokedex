@@ -19,8 +19,6 @@ namespace BeastBattle.Server.Graphs
         }
         public async Task<AbilityGType?> Ability(int id, BeastBattleDbContext beastBattleDbContext)
         {
-            Console.WriteLine("looo");
-
             var ability = await this.abilityService.Ability(id, beastBattleDbContext);
             Console.WriteLine(ability);
             return ability;

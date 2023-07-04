@@ -39,6 +39,5 @@ namespace BeastBattle.Server.Graphs
             var result = await typeService.TypeEditNoeffect(typeName, noeffects, dbContext);
             return result;
         }
-
     }
 }

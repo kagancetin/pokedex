@@ -7,7 +7,7 @@ namespace BeastBattle.Server.Services.Contracts
 {
     public interface IBeastService
     {
-        Task<List<BeastGType>?> Beasts();
+        Task<List<BeastGType>?> Beasts(BeastBattleDbContext BeastBattleDbContext);
         Task<BeastGType?> Beast(int id);
         Task<BeastGType?> FindEvolution(int id, BeastBattleDbContext beastBattleDbContext);
         Task<List<BeastGType>?> BeastsByType(string typeName, BeastBattleDbContext beastBattleDbContext);

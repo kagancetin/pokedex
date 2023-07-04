@@ -3,9 +3,6 @@
 @inject IJSRuntime JSRunTime
 @attribute [Authorize]
 
-
-
-
 @if (ability == null)
 {
     <PageTitle>Ability</PageTitle>
@@ -63,7 +60,6 @@ else
     </div>
 }
 
-
 @code {
 
     [Parameter]
@@ -84,7 +80,6 @@ else
         }
         else
         {
-            Console.WriteLine("laaaaa");
             foreach (var error in result.errors)
             {
                 Console.WriteLine(error.message);

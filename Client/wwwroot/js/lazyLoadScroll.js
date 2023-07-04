@@ -1,5 +1,4 @@
 var lazyLoad = (isEnd, funcName, nav, dotnetInstance) => {
-    console.log(window.location.pathname)
     if (window.location.pathname != nav) {
         document.onscroll = undefined;
     }
